@@ -1,0 +1,65 @@
+from fastapi import FastAPI, UploadFile, File
+from typing import List, Dict
+import fitz  # PyMuPDF for PDF processing
+import uvicorn
+
+app = FastAPI()
+
+#  Dummy AI Classifier - Simulates Watsonx SDLC classification
+def classify_text(text: str) -> str:
+    keywords = {
+        "requirement": "Requirement Analysis",
+        "design": "Project Design Phase",
+        "develop": "Development",
+        "test": "Testing",
+        "deploy": "Deployment"
+    }
+    for key, value in keywords.items():
+        if key in text.lower():
+            return value
+    return "Uncategorized"
+
+#  API Endpoint: /classify-requirements/
+@app.post("/classify-requirements/")
+async def classify_requirements(file: UploadFile = File(...)) -> Dict[str, List[str]]:
+    # Read PDF content
+    contents = await file.read()
+    doc = fitz.open(stream=contents, filetype="pdf")
+    
+    # SDLC Phase Buckets
+    phases = {
+        "Requirement Analysis": [],
+        "Project Design Phase": [],
+        "Development": [],
+        "Testing": [],
+        "Deployment": [],
+        "Uncategorized": []
+    }
+
+    #  Classify Each Sentence into SDLC Phases
+    for page in doc:
+        text = page.get_text()
+        sentences = text.split(".")
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if sentence:
+                phase = classify_text(sentence)
+                phases[phase].append(sentence)
+
+    return phases
+
+# Run the FastAPI app
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+Json 
+{
+  "Requirement Analysis": ["The system must allow login"],
+  "Development": ["Develop a dashboard interface"],
+  ...
+}
+
+Requirement
+fastapi
+uvicorn
+PyMuPDF

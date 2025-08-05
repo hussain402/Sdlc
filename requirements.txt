@@ -1,0 +1,14 @@
+streamlit
+fastapi
+pandas
+numpy
+scikit-learn
+transformers
+ibm-watson-machine-learning
+google-api-python-client
+pinecone-client
+langchain
+matplotlib
+seaborn
+python-dotenv
+PyMuPDF
